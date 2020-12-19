@@ -10,8 +10,6 @@ const express = require("express"),
   cors = require("cors"),
   session = require("express-session"),
   methodOverride = require("method-override"),
-  cookie = require("cookies"),
-  cookieParser = require("cookie-parser"),
   sessionstore = require("sessionstore"),
   fs = require("fs");
 
@@ -44,10 +42,23 @@ app.use(
   })
 );
 
+const { isNumber } = require("util");
+const initializePassport = require("./config/passport.js");
+initializePassport(
+  passport,
+  (name) => User.find((user) => user.name === name),
+  (id) => User.find((user) => user.id === id)
+);
+
+//Check if production or debug
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
+
 //Enables EJS
 app.set("view engine", "ejs");
 
-app.get("/", async (req, res) => {
+app.get("/", checkAuthenticated, async (req, res) => {
   let ads = await dbModule.findInDB(Ad);
   let ad = ads[Math.floor(Math.random() * ads.length)];
 
@@ -118,17 +129,16 @@ function createUser(nameIN, passIN) {
   });
 }
 
-
 function checkAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   }
-  res.redirect("/");
+  res.redirect("/login");
 }
 
 function checkNotAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
-    return res.redirect("/lobby");
+    return res.redirect("/");
   }
   next();
 }
