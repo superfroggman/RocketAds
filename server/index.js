@@ -2,17 +2,16 @@ const express = require("express"),
   app = express(),
   port = 3000,
   dbModule = require("./dbModule.js"),
-  Ad = require("./models/ad.js"),
+  Ad = require("./models/Ad.js"),
+  User = require("./models/User.js"),
   bodyParser = require("body-parser"),
   passport = require("passport"),
   flash = require("express-flash"),
   cors = require("cors"),
   session = require("express-session"),
   methodOverride = require("method-override"),
-  cookie = require("cookies"),
-  cookieParser = require("cookie-parser"),
   sessionstore = require("sessionstore"),
-  fs = require("fs")
+  fs = require("fs");
 
 //ConnectToMongo
 let store;
@@ -43,12 +42,23 @@ app.use(
   })
 );
 
+const { isNumber } = require("util");
+const initializePassport = require("./config/passport.js");
+initializePassport(
+  passport,
+  (name) => User.find((user) => user.name === name),
+  (id) => User.find((user) => user.id === id)
+);
+
+//Check if production or debug
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
+
 //Enables EJS
 app.set("view engine", "ejs");
 
-createAd("https://marksism.space/", "https://marksism.space/favicon.ico");
-
-app.get("/", async (req, res) => {
+app.get("/", checkAuthenticated, async (req, res) => {
   let ads = await dbModule.findInDB(Ad);
   let ad = ads[Math.floor(Math.random() * ads.length)];
 
@@ -56,6 +66,46 @@ app.get("/", async (req, res) => {
     linkUrl: ad.linkUrl,
     imageUrl: ad.imageUrl,
   });
+});
+
+//Get Request
+app.get("/register", checkNotAuthenticated, async (req, res) => {
+  res.render("register", {});
+});
+
+app.get("/login", checkNotAuthenticated, (req, res) => {
+  res.render("login");
+});
+
+app.post(
+  "/login",
+  checkNotAuthenticated,
+  passport.authenticate("local", {
+    successRedirect: "/",
+    failureRedirect: "/login",
+    failureFlash: true,
+  })
+);
+
+//Logout request
+app.delete("/logout", (req, res) => {
+  req.logOut();
+  res.redirect("/login");
+});
+
+//POST ROUTES
+app.post("/register", checkNotAuthenticated, async (req, res) => {
+  try {
+    const userExist = await dbModule.findInDBOne(User, req.body.name);
+    if (userExist == null) {
+      dbModule.saveToDB(createUser(req.body.name, req.body.password));
+      res.status(201).send();
+    } else {
+      return res.status(400).send("taken");
+    }
+  } catch {
+    res.status(500).send();
+  }
 });
 
 app.listen(port, () => console.log(`Server listening on port ${port}!`));
@@ -72,21 +122,28 @@ function createAd(linkUrl, imageUrl) {
   }
 }
 
+function createUser(nameIN, passIN) {
+  return new User({
+    name: nameIN,
+    password: passIN,
+  });
+}
+
 function checkAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-      return next();
-    }
-    res.redirect("/");
+  if (req.isAuthenticated()) {
+    return next();
   }
-  
-  function checkNotAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-      return res.redirect("/lobby");
-    }
-    next();
+  res.redirect("/login");
+}
+
+function checkNotAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return res.redirect("/");
   }
-  
-  function connectToMongo(dbName) {
+  next();
+}
+
+function connectToMongo(dbName) {
   if (fs.existsSync("mongoauth.json")) {
     const mongAuth = require("./mongoauth.json");
     dbModule.cnctDBAuth(dbName);
