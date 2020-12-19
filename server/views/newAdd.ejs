@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - LiveMessenger</title>
+
+    <script>
+      function addAd() {
+        let request = new XMLHttpRequest();
+        let errorText = document.getElementById("errorText");
+          request.open("POST", "/addAd", true);
+          request.setRequestHeader(
+            "Content-type",
+            "application/x-www-form-urlencoded"
+          );
+          let imageUrl = document.getElementById("imageUrl").value;
+          let linkUrl = document.getElementById("linkUrl").value;
+          request.send(`imageUrl=${imageUrl}&linkUrl=${linkUrl}`);
+          request.onreadystatechange = function () {
+            if(request.status == 201){
+                window.location = "/"
+            }else if(request.status == 500){
+                errorText.innerText = "500 - Internal Server Error"
+            }
+          };
+        }
+      
+    </script>
+  </head>
+
+  <body>
+    <div class="wrapper fadeInDown">
+      <div id="formContent">
+        <div class="fadeIn first">
+          <h1>Add ad!</h1>
+        </div>
+    <form onsubmit="addAd();return false;">
+      <input type="text" placeholder="Image URL" name="imageUrl" id="imageUrl" />
+      <input type="text" placeholder="Site URL" name="linkUrl" id="linkUrl" />
+
+      <p id="errorText">
+        <br />
+      </p>
+      <input type="submit" value="Add ad!" />
+    </form>
+  </body>
+</html>
