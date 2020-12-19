@@ -85,9 +85,9 @@ app.delete("/logout", (req, res) => {
 //POST ROUTES
 app.post("/register", checkNotAuthenticated, async (req, res) => {
   try {
-    const userExist = await dBModule.findInDBOne(User, req.body.name);
+    const userExist = await dbModule.findInDBOne(User, req.body.name);
     if (userExist == null) {
-      dBModule.saveToDB(createUser(req.body.name, req.body.password));
+      dbModule.saveToDB(createUser(req.body.name, req.body.password));
       res.status(201).send();
     } else {
       return res.status(400).send("taken");
