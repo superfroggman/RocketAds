@@ -2,20 +2,21 @@ const express = require("express"),
   app = express(),
   port = 3000,
   dbModule = require("./dbModule.js"),
-  Ad = require("./models/ad.js");
-(bodyParser = require("body-parser")),
-  (passport = require("passport")),
-  (flash = require("express-flash")),
-  (cors = require("cors")),
-  (session = require("express-session")),
-  (methodOverride = require("method-override")),
-  (cookie = require("cookies")),
-  (cookieParser = require("cookie-parser")),
-  (sessionstore = require("sessionstore"));
+  Ad = require("./models/ad.js"),
+  bodyParser = require("body-parser"),
+  passport = require("passport"),
+  flash = require("express-flash"),
+  cors = require("cors"),
+  session = require("express-session"),
+  methodOverride = require("method-override"),
+  cookie = require("cookies"),
+  cookieParser = require("cookie-parser"),
+  sessionstore = require("sessionstore"),
+  fs = require("fs")
 
 //ConnectToMongo
 let store;
-dbModule.connectToMongo("RocketAds");
+connectToMongo("RocketAds");
 
 /*Enables JSON, Cookies, extended for express and 
 creates a static path for CSS etc */
@@ -68,5 +69,35 @@ function createAd(linkUrl, imageUrl) {
         imageUrl: imageUrl,
       })
     );
+  }
+}
+
+function checkAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    res.redirect("/");
+  }
+  
+  function checkNotAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+      return res.redirect("/lobby");
+    }
+    next();
+  }
+  
+  function connectToMongo(dbName) {
+  if (fs.existsSync("mongoauth.json")) {
+    const mongAuth = require("./mongoauth.json");
+    dbModule.cnctDBAuth(dbName);
+    store = sessionstore.createSessionStore({
+      type: "mongodb",
+      authSource: "admin",
+      username: mongAuth.username,
+      password: mongAuth.pass,
+    });
+  } else {
+    dbModule.cnctDB(dbName);
+    store = sessionstore.createSessionStore({ type: "mongodb" });
   }
 }
