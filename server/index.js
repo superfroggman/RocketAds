@@ -58,19 +58,23 @@ if (process.env.NODE_ENV !== "production") {
 //Enables EJS
 app.set("view engine", "ejs");
 
-app.get("/", checkAuthenticated, async (req, res) => {
-  let ads = await dbModule.findInDB(Ad);
-  let ad = ads[Math.floor(Math.random() * ads.length)];
-
-  res.render("ad", {
-    linkUrl: ad.linkUrl,
-    imageUrl: ad.imageUrl,
-  });
+app.get("/", checkAuthenticated, (req, res) => {
+    res.render("index");
 });
+
+app.get('/ad', async (req, res) => {
+    let ads = await dbModule.findInDB(Ad);
+    let ad = ads[Math.floor(Math.random() * ads.length)];
+  
+    res.render("ad", {
+      linkUrl: ad.linkUrl,
+      imageUrl: ad.imageUrl,
+    });
+})
 
 //Get Request
 app.get("/register", checkNotAuthenticated, async (req, res) => {
-  res.render("register", {});
+  res.render("register");
 });
 
 app.get("/login", checkNotAuthenticated, (req, res) => {
