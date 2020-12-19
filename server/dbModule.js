@@ -47,6 +47,7 @@ exports.findInDB = async (Model, limit) => {
   return await Model.find().limit(limit);
 };
 
+
 //takes input with type Model. Saves that model in Database. Cant be used before cnctDB or cnctDBAuth.
 exports.saveToDB = (input) => {
   input.save((error, sucess) => {
