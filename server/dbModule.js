@@ -47,10 +47,18 @@ exports.findUserWithID = async (Model, toFind) => {
   return await Model.findOne({ _id: toFind });
 };
 
+exports.findAdWithUrl = async (Model, toFind) => {
+  return await Model.findOne({ linkUrl: toFind });
+};
+
 //takes input with type Model. Saves that model in Database. Cant be used before cnctDB or cnctDBAuth.
 exports.saveToDB = (input) => {
   input.save((error, sucess) => {
     if (sucess) console.log(`Successfully saved ${input} to the database!`);
     if (error) console.error(error);
   });
+};
+
+exports.updateCoins = async (Model, name, amount) => {
+  await Model.updateOne({ name: name }, { $inc: { coins: amount } });
 };

@@ -59,18 +59,29 @@ if (process.env.NODE_ENV !== "production") {
 app.set("view engine", "ejs");
 
 app.get("/", checkAuthenticated, (req, res) => {
-    res.render("index");
+  res.render("index");
+  createAd("https://cloudremover.com", "https://cloudremover.com/favicon.ico");
 });
 
-app.get('/ad', async (req, res) => {
-    let ads = await dbModule.findInDB(Ad);
-    let ad = ads[Math.floor(Math.random() * ads.length)];
-  
-    res.render("ad", {
-      linkUrl: ad.linkUrl,
-      imageUrl: ad.imageUrl,
-    });
-})
+app.get("/ad", async (req, res) => {
+  let ads = await dbModule.findInDB(Ad);
+  let ad = ads[Math.floor(Math.random() * ads.length)];
+
+  dbModule.updateCoins(User, ad.user, -1);
+
+  res.render("ad", {
+    linkUrl: ad.linkUrl,
+    imageUrl: ad.imageUrl,
+  });
+});
+
+app.get("/adRedir", async (req, res) => {
+  let ad = await dbModule.findAdWithUrl(Ad, req.query.ad);
+  console.log(ad)
+  dbModule.updateCoins(User, ad.user, -10);
+
+  res.redirect(ad.linkUrl);
+});
 
 //Get Request
 app.get("/register", checkNotAuthenticated, async (req, res) => {
@@ -121,6 +132,7 @@ function createAd(linkUrl, imageUrl) {
       new Ad({
         linkUrl: linkUrl,
         imageUrl: imageUrl,
+        user: "antenn2", //TODO: add dynamic user
       })
     );
   }
