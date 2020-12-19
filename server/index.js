@@ -130,7 +130,8 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
 app.post("/addAd", checkAuthenticated, async (req, res) => {
   try {
     if(req.body.imageUrl && req.body.linkUrl){
-      createAd(req.body.linkUrl, req.body.imageUrl)
+      let tmp = await req.user;
+      createAd(req.body.linkUrl, req.body.imageUrl, tmp.name)
     }
     res.sendStatus(201)
   } catch (error) {
@@ -142,13 +143,13 @@ app.post("/addAd", checkAuthenticated, async (req, res) => {
 app.listen(port, () => console.log(`Server listening on port ${port}!`));
 
 //Functions
-function createAd(linkUrl, imageUrl) {
+function createAd(linkUrl, imageUrl, user) {
   if (linkUrl && imageUrl) {
     dbModule.saveToDB(
       new Ad({
         linkUrl: linkUrl,
         imageUrl: imageUrl,
-        user: "antenn2", //TODO: add dynamic user
+        user: user
       })
     );
   }
