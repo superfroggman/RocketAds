@@ -81,6 +81,10 @@ app.get("/login", checkNotAuthenticated, (req, res) => {
   res.render("login");
 });
 
+app.get("/newAdd", checkAuthenticated, (req, res) => {
+  res.render("newAdd");
+});
+
 app.post(
   "/login",
   checkNotAuthenticated,
@@ -110,6 +114,18 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
   } catch {
     res.status(500).send();
   }
+});
+
+app.post("/addAd", checkAuthenticated, async (req, res) => {
+  try {
+    if(req.body.imageUrl && req.body.linkUrl){
+      createAd(req.body.linkUrl, req.body.imageUrl)
+    }
+    res.sendStatus(201)
+  } catch (error) {
+    res.sendStatus(500)
+  }
+  
 });
 
 app.listen(port, () => console.log(`Server listening on port ${port}!`));
