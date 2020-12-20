@@ -25,7 +25,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(flash());
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
     saveUninitialized: false,
     secret: "keyboard cat",
     store: store,
@@ -47,7 +46,7 @@ const initializePassport = require("./config/passport.js");
 initializePassport(
   passport,
   (name) => User.find((user) => user.name === name),
-  (id) => User.find((user) => user.id === id)
+  (id) => User.find((user) => user._id === id)
 );
 
 //Check if production or debug
@@ -66,12 +65,12 @@ app.get("/", checkAuthenticated, (req, res) => {
 app.get("/ad", async (req, res) => {
 
   /*This will add the ability to gain coins.
-  however this is not working currently */
+  however this is not working currently 
   if (req.headers.referer) {
     console.log("Request is coming from iFrame i think");
   } else {
     console.log("No iFrame maybe ");
-  }
+  }*/
 
   let ads = await dbModule.findInDB(Ad);
   let ad = ads[Math.floor(Math.random() * ads.length)];
