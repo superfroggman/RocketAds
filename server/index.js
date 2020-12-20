@@ -64,6 +64,15 @@ app.get("/", checkAuthenticated, (req, res) => {
 });
 
 app.get("/ad", async (req, res) => {
+
+  /*This will add the ability to gain coins.
+  however this is not working currently */
+  if (req.headers.referer) {
+    console.log("Request is coming from iFrame i think");
+  } else {
+    console.log("No iFrame maybe ");
+  }
+
   let ads = await dbModule.findInDB(Ad);
   let ad = ads[Math.floor(Math.random() * ads.length)];
 
@@ -138,16 +147,20 @@ app.post("/addAd", checkAuthenticated, async (req, res) => {
           if (!(await dbModule.findImageURL(Ad, imageUrl))) {
             createAd(req.body.linkUrl, req.body.imageUrl, tmp.name);
             res.sendStatus(201);
-          }else{
-            res.status(403).send("Ad with the same image already in use! Change Image!");
+          } else {
+            res
+              .status(403)
+              .send("Ad with the same image already in use! Change Image!");
           }
-        }else{
-          res.status(403).send("Ad with the same link already in use! Change Link!");
+        } else {
+          res
+            .status(403)
+            .send("Ad with the same link already in use! Change Link!");
         }
       }
-    } 
+    }
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).send("500 - Internal Server Error");
   }
 });
