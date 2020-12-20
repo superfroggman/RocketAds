@@ -145,7 +145,7 @@ app.post("/addAd", checkAuthenticated, async (req, res) => {
           res.status(403).send("Ad with the same link already in use! Change Link!");
         }
       }
-    }
+    } 
   } catch (error) {
     console.log(error)
     res.status(500).send("500 - Internal Server Error");
