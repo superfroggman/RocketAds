@@ -20,8 +20,16 @@
           request.onreadystatechange = function () {
             if(request.status == 201){
                 window.location = "/"
-            }else if(request.status == 500){
-                errorText.innerText = "500 - Internal Server Error"
+            }else if(request.status == 403){
+              errorText.innerText = request.responseText
+            }
+            else if(request.status == 500){
+                errorText.innerText = request.responseText
+            }else if(request.status == 404){
+                errorText.innerText = "404 - Could not be found!"
+            }
+            else{
+              errorText.innerText = "Unknown Error Occured!"
             }
           };
         }

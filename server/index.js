@@ -77,7 +77,7 @@ app.get("/ad", async (req, res) => {
 
 app.get("/adRedir", async (req, res) => {
   let ad = await dbModule.findAdWithUrl(Ad, req.query.ad);
-  console.log(ad)
+  console.log(ad);
   dbModule.updateCoins(User, ad.user, -10);
 
   res.redirect(ad.linkUrl);
@@ -129,30 +129,40 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
 
 app.post("/addAd", checkAuthenticated, async (req, res) => {
   try {
-    if(req.body.imageUrl && req.body.linkUrl){
+    if (req.body.imageUrl && req.body.linkUrl) {
       let tmp = await req.user;
-      createAd(req.body.linkUrl, req.body.imageUrl, tmp.name)
+      let linkUrl = req.body.linkUrl;
+      let imageUrl = req.body.imageUrl;
+      if (linkUrl && imageUrl) {
+        if (!(await dbModule.findLinkURL(Ad, linkUrl))) {
+          if (!(await dbModule.findImageURL(Ad, imageUrl))) {
+            createAd(req.body.linkUrl, req.body.imageUrl, tmp.name);
+            res.sendStatus(201);
+          }else{
+            res.status(403).send("Ad with the same image already in use! Change Image!");
+          }
+        }else{
+          res.status(403).send("Ad with the same link already in use! Change Link!");
+        }
+      }
     }
-    res.sendStatus(201)
   } catch (error) {
-    res.sendStatus(500)
+    console.log(error)
+    res.status(500).send("500 - Internal Server Error");
   }
-  
 });
 
 app.listen(port, () => console.log(`Server listening on port ${port}!`));
 
 //Functions
 function createAd(linkUrl, imageUrl, user) {
-  if (linkUrl && imageUrl) {
-    dbModule.saveToDB(
-      new Ad({
-        linkUrl: linkUrl,
-        imageUrl: imageUrl,
-        user: user
-      })
-    );
-  }
+  dbModule.saveToDB(
+    new Ad({
+      linkUrl: linkUrl,
+      imageUrl: imageUrl,
+      user: user,
+    })
+  );
 }
 
 function createUser(nameIN, passIN) {

@@ -39,6 +39,14 @@ exports.findInDBOne = async (Model, toFind) => {
   return await Model.findOne({ name: toFind });
 };
 
+exports.findLinkURL = async (Model, toFind) => {
+  return await Model.findOne({ linkUrl: toFind });
+};
+
+exports.findImageURL = async (Model, toFind) => {
+  return await Model.findOne({ imageUrl: toFind });
+};
+
 exports.findInDB = async (Model, limit) => {
   return await Model.find().limit(limit);
 };
