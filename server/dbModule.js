@@ -1,7 +1,7 @@
 const mongoose = require("mongoose"),
   fs = require("fs");
 let db;
-
+mongoose.set('useCreateIndex', true); 
 //Connect to MongoDB With Authentication.
 exports.cnctDBAuth = (collectionname) => {
   const mongAuth = require("./mongoauth.json");

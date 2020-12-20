@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+mongoose.set('useCreateIndex', true); 
 //Creates the RoomSchema and exports it
 const AdSchema = new mongoose.Schema({
   linkUrl: {

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+mongoose.set('useCreateIndex', true); 
 //Creates the UserSchema and exports it
 const UserSchema = new mongoose.Schema({
   name: {

@@ -2,7 +2,7 @@ const LocalStrategy = require('passport-local').Strategy,
   dbModule = require("../dbModule.js"),
   User = require("../models/User.js");
 
-function initialize(passport) {
+async function initialize(passport) {
   const authenticateUser = async (name, password, done) => {
     const user = await dbModule.findInDBOne(User, name)
     if (user == null) {
@@ -22,8 +22,8 @@ function initialize(passport) {
 
   passport.use(new LocalStrategy({ usernameField: 'name' }, authenticateUser))
   passport.serializeUser((user, done) => done(null, user.id))
-  passport.deserializeUser((id, done) => {
-    return done(null, dbModule.findUserWithID(User, id))
+  passport.deserializeUser(async (id, done) => {
+    return done(null, await dbModule.findUserWithID(User, id))
   })
 }
 
